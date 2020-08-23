@@ -23,4 +23,6 @@ Route::post('addSpecialization', 'api\SpecializationController@addSpecialization
 
 Route::group(['middleware' => ['auth:api', 'twofactor']],function(){
     Route::post('details', 'api\TeacherController@details');
+    Route::post('registerTeacher', 'api\TeacherController@registerTeacher');
+
 });

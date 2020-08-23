@@ -46,11 +46,71 @@ class TeacherController extends Controller
     public function register(Request $request) 
     { 
         //php artisan serve --host=192.168.101.61 --port=8080
-        
+     //   return response()->json(['success'=>$request->all()], $this-> successStatus);
         $validator = Validator::make($request->all(), [ 
-            'name' => 'required', 
+            'name' => 'sometimes', 
             'email' => 'required| unique:users|email', 
             'password' => 'required', 
+            'phone_number' => 'sometimes', 
+            'address'=>'sometimes',
+            'main_specialization'=>'sometimes|exists:specializations,id'
+            ,
+            'university'=>'sometimes|numeric |min:0',
+            'cv'=>'sometimes|file',
+            'berthday'=>'sometimes|date|date_format:Y-m-d'
+            ,'nationality'=>'sometimes|numeric |min:0',
+            'Baccalaureate_type'=>[
+                'sometimes',
+                Rule::in([true,false]),
+            ], 
+            'gender'=>[
+                'sometimes',
+                Rule::in([true,false]),
+            ],
+
+            ]);
+        if ($validator->fails()) { 
+            return response()->json(['error'=>$validator->errors()], 401);            
+        }
+        else{
+            
+        $input = $request->all(); 
+        $input['name']="koko";
+        $input['password'] = bcrypt($input['password']); 
+        $user = User::create($input); 
+        $input['id'] = $user->id; 
+        $success['token'] =  $user->createToken('MyApp')-> accessToken; 
+        $success['name'] =  $user->name;
+        $user->generateTwoFactorCode();
+        $user->notify(new TwoFactorCode());
+     return response()->json(['success'=>$success], $this-> successStatus); 
+        
+        try {
+            $teacher=Teacher::create($input);
+            $success['token'] =  $user->createToken('MyApp')-> accessToken; 
+            $success['name'] =  $user->name;
+            $user->generateTwoFactorCode();
+            $user->notify(new TwoFactorCode());
+         return response()->json(['success'=>$success], $this-> successStatus); 
+             } catch (\Illuminate\Database\QueryException  $e) {
+
+            $user->delete();
+    
+           // abort(422, $e);
+            return response()->json(['error'=>$e], 401);;
+        }
+        
+        
+    
+        }
+    
+    }
+    public function registerTeacher(Request $request) 
+    { 
+        //php artisan serve --host=192.168.101.61 --port=8080
+     //   return response()->json(['success'=>$request->all()], $this-> successStatus);
+        $validator = Validator::make($request->all(), [ 
+            'name' => 'required', 
             'phone_number' => 'required', 
             'address'=>'required',
             'main_specialization'=>'required|exists:specializations,id'
@@ -75,10 +135,14 @@ class TeacherController extends Controller
         else{
             
         $input = $request->all(); 
-        $input['password'] = bcrypt($input['password']); 
-        $user = User::create($input); 
+        $user = Auth::user(); 
         $input['id'] = $user->id; 
-    
+        $success['token'] =  $user->createToken('MyApp')-> accessToken; 
+        $success['name'] =  $user->name;
+        $user->generateTwoFactorCode();
+        $user->notify(new TwoFactorCode());
+     return response()->json(['success'=>$success], $this-> successStatus); 
+        
         try {
             $teacher=Teacher::create($input);
             $success['token'] =  $user->createToken('MyApp')-> accessToken; 
@@ -107,7 +171,7 @@ class TeacherController extends Controller
     public function details() 
     { 
         $user = Auth::user(); 
-        return response()->json(['success' => $user], $this-> successStatus);
+        return response()->json(['success' => $user->email], $this-> successStatus);
 
          
     } 

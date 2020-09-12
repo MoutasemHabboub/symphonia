@@ -18,11 +18,17 @@ Route::middleware('auth:api')->get('/user', function (Request $request) {
     return $request->user();
 });
 Route::post('login', 'api\TeacherController@login');
+Route::post('schoolLogin', 'api\SchoolController@login');
+
 Route::post('register', 'api\TeacherController@register');
+Route::post('registerSchool', 'api\SchoolController@registerSchool');
+
 Route::post('addSpecialization', 'api\SpecializationController@addSpecialization');
 
 Route::group(['middleware' => ['auth:api', 'twofactor']],function(){
     Route::post('details', 'api\TeacherController@details');
     Route::post('registerTeacher', 'api\TeacherController@registerTeacher');
+    Route::post('createPost', 'api\PostController@create');
+
 
 });

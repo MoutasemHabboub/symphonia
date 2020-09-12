@@ -38,6 +38,14 @@ class User extends Authenticatable
     protected $casts = [
         'email_verified_at' => 'datetime',
     ];
+    public function school()
+    {
+        return $this->hasOne('App\School', 'id');
+    }public function teacher()
+    {
+        return $this->hasOne('App\Teacher', 'id');
+    }
+
     public function generateTwoFactorCode()
     {
         $this->timestamps = false;
@@ -45,6 +53,7 @@ class User extends Authenticatable
         $this->two_factor_expires_at = now()->addMinutes(100);
         $this->save();
     }
+    
     public function resetTwoFactorCode()
 {
     $this->timestamps = false;
@@ -52,4 +61,5 @@ class User extends Authenticatable
     $this->two_factor_expires_at = null;
     $this->save();
 }
+
 }
